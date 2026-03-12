@@ -1,0 +1,6 @@
+FROM alpine:latest
+WORKDIR /app
+COPY . /app
+ENV MESSAGE=Hello from Docksmith!
+RUN echo "Building application..."
+CMD ["sh", "-c", "echo $MESSAGE && echo 'Container is running!'"]
