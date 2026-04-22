@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>README</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        :root {
+            --bg-color: var(--vscode-editor-background, #ffffff);
+            --text-color: var(--vscode-editor-foreground, #1a1a1b);
+            --heading-color: var(--vscode-editor-foreground, #0f172a);
+            --secondary-text: var(--vscode-descriptionForeground, #64748b);
+            --accent-color: var(--vscode-textLink-foreground, #3b82f6);
+            --code-bg: var(--vscode-textCodeBlock-background, rgba(241, 245, 249, 0.4));
+            --border-color: var(--vscode-widget-border, #e2e8f0);
+            --header-bg: var(--vscode-editor-background, #ffffff);
+        }
+
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            line-height: 1.75;
+            color: var(--text-color);
+            max-width: 850px;
+            margin: 0 auto;
+            padding: 5rem 2rem 3rem;
+            background-color: var(--bg-color);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .export-header {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+            padding: 0.75rem 2rem; background: var(--header-bg);
+            border-bottom: 1px solid var(--border-color);
+            display: flex; justify-content: flex-end; gap: 0.75rem;
+            backdrop-filter: blur(8px); display: none;
+        }
+
+        .btn {
+            background: var(--accent-color); color: white; border: none;
+            padding: 0.4rem 0.8rem; border-radius: 6px; font-size: 0.85rem;
+            font-weight: 500; cursor: pointer; transition: opacity 0.2s;
+            font-family: 'Outfit', sans-serif;
+        }
+        .btn:hover { opacity: 0.9; }
+
+        h1, h2, h3 { font-family: 'Outfit', sans-serif; color: var(--heading-color); font-weight: 700; margin-top: 2rem; }
+        h1 { font-size: 2.25rem; border-bottom: 2px solid var(--border-color); padding-bottom: 0.5rem; }
+        
+        pre { background: var(--code-bg); padding: 1.25rem; border-radius: 12px; border: 1px solid var(--border-color); overflow-x: auto; margin: 1.5rem 0; }
+        code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.9em; padding: 0.2rem 0.4rem; border-radius: 6px; background-color: var(--code-bg); }
+        
+        .mermaid { background: white; padding: 1rem; border-radius: 12px; margin: 1.5rem 0; display: flex; justify-content: center; border: 1px solid var(--border-color); }
+        svg { max-width: 100% !important; height: auto !important; }
+
+        @media print { .export-header { display: none; } body { padding: 0; } }
+    </style>
+</head>
+<body>
+    <div class="export-header">
+        <button class="btn" onclick="exportFile('html')">Export HTML</button>
+        <button class="btn" onclick="exportFile('pdf')">Export PDF</button>
+        <button class="btn" onclick="exportFile('docx')">Export DOCX</button>
+    </div>
+    <div class="content"><h1>Docksmith</h1>
+<p>A simplified Docker-like container system implemented in Go.</p>
+<h2>Overview</h2>
+<p>Docksmith is a minimal container runtime and build system that demonstrates core containerization concepts:</p>
+<ul>
+<li>Image building from Docksmithfiles</li>
+<li>Layer-based filesystem with caching</li>
+<li>Process isolation using Linux primitives</li>
+<li>Image management</li>
+</ul>
+<h2>Architecture</h2>
+<h3>Components</h3>
+<ol>
+<li><strong>CLI Layer</strong> (<code>cmd/</code>) - Command-line interface using Cobra</li>
+<li><strong>Build Engine</strong> (<code>build/</code>) - Parses Docksmithfiles and creates layered images</li>
+<li><strong>Runtime</strong> (<code>runtime/</code>) - Executes containers with isolation</li>
+<li><strong>Layers</strong> (<code>layers/</code>) - Manages filesystem layers as tar archives</li>
+<li><strong>Images</strong> (<code>images/</code>) - Handles image manifests and metadata</li>
+<li><strong>Cache</strong> (<code>cache/</code>) - Implements build cache for faster rebuilds</li>
+<li><strong>Util</strong> (<code>util/</code>) - Shared utilities for hashing, tar operations, etc.</li>
+</ol>
+<h3>Directory Structure</h3>
+<pre><code>~/.docksmith/
+├── images/      # Image manifests (JSON files)
+├── layers/      # Layer tar archives (sha256_&lt;hash&gt;.tar)
+└── cache/       # Build cache index
+</code></pre>
+<h2>Docksmithfile Syntax</h2>
+<p>Supported instructions:</p>
+<pre><code class="language-dockerfile">FROM &lt;image[:tag]&gt;          # Load base image layers
+COPY &lt;src&gt; &lt;dest&gt;           # Copy files from build context (creates layer)
+RUN &lt;command&gt;               # Execute command (creates layer)
+WORKDIR &lt;path&gt;              # Set working directory (config only)
+ENV &lt;key=value&gt;             # Set environment variable (config only)
+CMD [&quot;exec&quot;, &quot;arg&quot;, ...]    # Set default command (config only)
+</code></pre>
+<h3>Example Docksmithfile</h3>
+<pre><code class="language-dockerfile">FROM python:3.11-slim
+WORKDIR /app
+COPY . /app
+ENV MSG=Hello
+RUN python setup.py install
+CMD [&quot;python&quot;, &quot;main.py&quot;]
+</code></pre>
+<h2>Commands</h2>
+<h3>Build an Image</h3>
+<pre><code class="language-bash">docksmith build -t myapp:latest ./my-app
+</code></pre>
+<p>Builds an image from the Docksmithfile in the <code>./my-app</code> directory.</p>
+<p>Build features:</p>
+<ul>
+<li>Layer caching based on instruction content and dependencies</li>
+<li>Deterministic layer creation with SHA256 digests</li>
+<li>Isolated RUN execution</li>
+</ul>
+<h3>Run a Container</h3>
+<pre><code class="language-bash"># Use default CMD from image
+docksmith run myapp:latest
+
+# Override CMD
+docksmith run myapp:latest /bin/sh
+</code></pre>
+<p>Runtime features:</p>
+<ul>
+<li>Linux namespace isolation (CLONE_NEWNS, CLONE_NEWPID, CLONE_NEWUTS)</li>
+<li>chroot filesystem isolation</li>
+<li>Environment variable injection</li>
+<li>Working directory configuration</li>
+</ul>
+<h3>List Images</h3>
+<pre><code class="language-bash">docksmith images
+</code></pre>
+<p>Shows all built images with their tags, digests, and layer counts.</p>
+<h3>Remove an Image</h3>
+<pre><code class="language-bash">docksmith rmi myapp:latest
+</code></pre>
+<p>Deletes an image manifest (layers are retained).</p>
+<h2>Building Docksmith</h2>
+<h3>Prerequisites</h3>
+<ul>
+<li>Go 1.21 or later</li>
+<li>Linux (for full isolation features)</li>
+</ul>
+<h3>Build</h3>
+<pre><code class="language-bash"># Clone or navigate to the project directory
+cd CC_Project
+
+# Download dependencies
+go mod download
+
+# Build the binary
+go build -o docksmith .
+
+# Install to PATH (optional)
+go install
+</code></pre>
+<h2>Example Applications</h2>
+<h3>Simple Shell App</h3>
+<p>Located in <code>examples/simple-app/</code>:</p>
+<pre><code class="language-bash">cd examples/simple-app
+docksmith build -t simple:latest .
+docksmith run simple:latest
+</code></pre>
+<h3>Python App</h3>
+<p>Located in <code>examples/python-app/</code>:</p>
+<pre><code class="language-bash">cd examples/python-app
+docksmith build -t pyapp:latest .
+docksmith run pyapp:latest
+</code></pre>
+<h2>Technical Details</h2>
+<h3>Layer Storage</h3>
+<p>Layers are stored as tar archives with:</p>
+<ul>
+<li>Deterministic ordering (sorted file paths)</li>
+<li>Zero timestamps for reproducibility</li>
+<li>SHA256 digest as filename: <code>sha256_&lt;hash&gt;.tar</code></li>
+</ul>
+<h3>Build Cache</h3>
+<p>Cache keys are computed from:</p>
+<ul>
+<li>Previous layer digest</li>
+<li>Instruction text</li>
+<li>Current working directory</li>
+<li>Environment variables (sorted)</li>
+<li>Source file hashes (for COPY)</li>
+</ul>
+<p>Cache hits avoid re-executing expensive operations.</p>
+<h3>Image Manifest</h3>
+<p>Stored as JSON in <code>~/.docksmith/images/&lt;name&gt;_&lt;tag&gt;.json</code>:</p>
+<pre><code class="language-json">{
+  &quot;name&quot;: &quot;myapp&quot;,
+  &quot;tag&quot;: &quot;latest&quot;,
+  &quot;digest&quot;: &quot;sha256:abc123...&quot;,
+  &quot;created&quot;: &quot;2026-03-12T10:30:00Z&quot;,
+  &quot;config&quot;: {
+    &quot;Env&quot;: [&quot;MSG=Hello&quot;],
+    &quot;Cmd&quot;: [&quot;python&quot;, &quot;main.py&quot;],
+    &quot;WorkingDir&quot;: &quot;/app&quot;
+  },
+  &quot;layers&quot;: [
+    {
+      &quot;digest&quot;: &quot;sha256:def456...&quot;,
+      &quot;size&quot;: 12345,
+      &quot;createdBy&quot;: &quot;COPY . /app&quot;
+    }
+  ]
+}
+</code></pre>
+<h3>Isolation</h3>
+<p>On Linux, containers are isolated using:</p>
+<ul>
+<li><strong>Namespace isolation</strong>: <code>unshare --fork --pid --mount --uts</code></li>
+<li><strong>Filesystem isolation</strong>: <code>chroot</code> to container rootfs</li>
+<li><strong>Process isolation</strong>: Separate PID namespace</li>
+</ul>
+<p>Fallback: On non-Linux systems, basic process execution without full isolation.</p>
+<h2>Limitations</h2>
+<p>This is a simplified educational implementation. Notable limitations:</p>
+<ul>
+<li>No networking support</li>
+<li>No volume mounting</li>
+<li>No registry pull/push</li>
+<li>Layer deduplication is minimal</li>
+<li>No user namespace isolation</li>
+<li>No resource limits (cgroups)</li>
+</ul>
+</div>
+    <script>
+        const vscode = acquireVsCodeApi();
+        function exportFile(format) { vscode.postMessage({ command: 'export', format: format }); }
+        mermaid.initialize({ startOnLoad: true, theme: 'default', securityLevel: 'loose' });
+        // Help Puppeteer know when we are done
+        window.addEventListener('load', () => {
+            mermaid.run().then(() => {
+                document.body.classList.add('mermaid-rendered');
+            });
+        });
+    </script>
+</body>
+</html>
